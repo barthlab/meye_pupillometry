@@ -24,6 +24,9 @@ If you want to train models, you also need
 We provide a [Dockerfile](./Dockerfile) for building an image with docker. It targets `tensorflow/tensorflow:2.13.0-gpu-jupyter`; build and run with GPU access, e.g.:
 ```bash
 docker build -t meye .
+# for video in parent folder
+docker run --gpus all -it --rm -v "$(Split-Path -Parent $PWD):/workspace" -w "/workspace/$(Split-Path -Leaf $PWD)" meye bash
+# for video in the same folder
 docker run --gpus all -it --rm -v "$PWD:/workspace/meye" -w /workspace/meye meye bash
 ```
 

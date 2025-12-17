@@ -9,7 +9,7 @@ tf.disable_v2_behavior()
 
 DEFAULT_ROOT = Path(
     r"/workspace/Ratatouille/ingredients"
-    r"/HeadFixedTraining/SensoryPrediction_202512"
+    r"/HeadFixedTraining_FromJoe/SAT_202512"
 )
 DEFAULT_MODEL = Path(
     # r"/workspace/meye/models/meye-2022-01-24.h5"
