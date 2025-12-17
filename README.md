@@ -21,33 +21,45 @@ If you want to train models, you also need
   - pandas
   - sklearn
 
-We provide a [Dockerfile](./Dockerfile) for building an image with docker.
+We provide a [Dockerfile](./Dockerfile) for building an image with docker. It targets `tensorflow/tensorflow:2.13.0-gpu-jupyter`; build and run with GPU access, e.g.:
+```bash
+docker build -t meye .
+docker run --gpus all -it --rm -v "$PWD:/workspace/meye" -w /workspace/meye meye bash
+```
 
 ## Make Predictions with Pretrained Models
 
 You can make predictions with pretrained models on pre-recorded videos or webcam streams. 
 
-  1. Download the [pretrained model](https://github.com/fabiocarrara/meye/releases/download/v0.1.1/meye-2022-01-24.h5). If you want to use the [old model](https://github.com/fabiocarrara/meye/releases/download/v0.1/meye-segmentation_i128_s4_c1_f16_g1_a-relu.hdf5), check out version [`v0.1` of this branch](https://github.com/fabiocarrara/meye/tree/v0.1). See available models in [Releases](https://github.com/fabiocarrara/meye/releases).
+  1. Choose a model. This repo already ships:
+       - `models/meye-2025-03-12-Offline.h5` (latest offline-tuned model)
+       - `models/meye-2022-01-24.h5` (original release)
+     Older models are still available in [Releases](https://github.com/fabiocarrara/meye/releases) (e.g. [`v0.1`](https://github.com/fabiocarrara/meye/tree/v0.1)).
   2. Check out the `pupillometry-offline-videos.ipynb` notebook for a complete example of pupillometry data analysis.
-  3. In alternative, we provide also the `predict.py` script that implements the basic loop to make predictions on video streams. E.g.:
+  3. Use the `predict.py` script for a single video/webcam stream. The output CSV defaults to `pupillometry.csv` and the output video is now optional (set `-ov` to write it).
 
        - ```bash
-         # input: webcam (default)
-         # prediction roi: biggest central square crop (default)
-         # outputs: predictions.mp4, predictions.csv (default)
-         predict.py path/to/model
+         # input: webcam (default), CSV only
+         predict.py models/meye-2025-03-12-Offline.h5
          ```
      
        - ```bash
-         # input: video file
-         # prediction roi: left=80, top=80, right=208, bottom=208
-         # outputs: video_with_predictions.mp4, pupil_metrics.csv
-         predict.py path/to/model path/to/video.mp4 -rl 80 -rt 80 -rr 208 -rb 208 -ov video_with_predictions.mp4 -oc pupil_metrics.csv
+         # input: video file with custom ROI and explicit outputs
+         predict.py models/meye-2025-03-12-Offline.h5 path/to/video.mp4 -rl 80 -rt 80 -rr 208 -rb 208 -ov video_with_predictions.mp4 -oc pupil_metrics.csv
          ```
        - ```bash
          # check all parameters with
          predict.py -h
          ```
+
+### Batch predictions from metadata
+
+Use `predict_custom_batch.py` to scan a root folder for `EYE_*.npz` metadata files (each containing a `bbox = [x, y, w, h]`) and corresponding `VIDEO_*.mp4` recordings. For every pair it writes `pupil/PUPIL_<SESSION>.csv` (and every few runs a preview `.mp4`).
+
+```bash
+python predict_custom_batch.py --root /path/to/sessions --model models/meye-2025-03-12-Offline.h5 --skip-existing
+```
+Use `--thr` to change the threshold or drop `--skip-existing` to recompute outputs.
     
 ## Training Models
 
