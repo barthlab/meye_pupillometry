@@ -25,7 +25,7 @@ def compute_metrics(p, thr=None, nms=False):
         if nms:  # perform non-maximum suppression: keep only largest area
             s = np.ones((3, 3))  # connectivity structure
             p = nms_on_area(p, s)
-
+        
     center = center_of_mass(p)
     area = p.sum()
     return center, area
@@ -60,7 +60,11 @@ def draw_predictions(image, predictions, thr=None):
     draw.text((5, 5), 'E: {: >3.1%}  B:{: >3.1%}'.format(eye, blink), fill=(0, 0, 255))
     # draw.text((5, image.height - 5), ''.format(blink), fill=(255, 0, 0))
 
-    return preview
+    side_by_side = Image.new('RGBA', (x.width * 2, x.height))
+    side_by_side.paste(x, (0, 0))
+    side_by_side.paste(preview, (x.width, 0))
+
+    return side_by_side
 
 
 def visualize(x, y, out=None, thr=0, n_cols=4, width=20):
