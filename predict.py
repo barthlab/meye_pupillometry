@@ -49,13 +49,13 @@ def main(args):
     frames_and_predictions = map(lambda x: (x, predict(x)), cropped)
 
     with open(args.output_csv, 'w') as out_csv:
-        print('frame,pupil-area,pupil-x,pupil-y,eye,blink', file=out_csv)
+        print('frame,pupil-area,pupil-x,pupil-y,eye,blink,sclera-area,sclera-x,sclera-y', file=out_csv)
         for idx, (frame, predictions) in enumerate(tqdm(frames_and_predictions, total=n_frames)):
             pupil_map, tags = predictions
-            pupil_map = pupil_map[..., 0]
             is_eye, is_blink = tags.squeeze()
-            (pupil_y, pupil_x), pupil_area = compute_metrics(pupil_map, thr=args.thr, nms=True)
-            row = [idx, pupil_area, pupil_x, pupil_y, is_eye, is_blink]
+            (pupil_y, pupil_x), pupil_area = compute_metrics(pupil_map[..., 0], thr=args.thr, nms=True)
+            (sclera_y, sclera_x), sclera_area = compute_metrics(pupil_map[..., 1], thr=args.thr, nms=True)
+            row = [idx, pupil_area, pupil_x, pupil_y, is_eye, is_blink, sclera_area, sclera_x, sclera_y]
             row = ','.join(list(map(str, row)))
             print(row, file=out_csv)
 
